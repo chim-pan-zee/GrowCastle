@@ -20,6 +20,11 @@ class Enemy {
     this.position = position;
     this.width = 100; //적의 가로, 세로
     this.height = 100;
+    this.waypointIndex = 0;
+    this.center = {
+      x: this.position.x + this.width / 2,
+      y: this.position.y + this.height / 2,
+    };
   }
 
   draw() {
@@ -29,21 +34,43 @@ class Enemy {
 
   update() {
     this.draw();
-    this.position.x += 1;
+
+    const waypoint = waypoints[this.waypointIndex];
+    const y_distance = waypoint.y - this.center.y;
+    const x_distance = waypoint.x - this.center.x;
+    const angle = Math.atan2(y_distance, x_distance);
+    this.position.x += Math.cos(angle);
+    this.position.y += Math.sin(angle);
+    this.center = {
+      x: this.position.x + this.width / 2,
+      y: this.position.y + this.height / 2,
+    };
+
+    if (
+      Math.round(this.center.x) === Math.round(waypoint.x) &&
+      Math.round(this.center.y) === Math.round(waypoint.y) &&
+      this.waypointIndex < waypoints.length - 1
+    ) {
+      this.waypointIndex++;
+    }
   }
 }
 
-const enemy = new Enemy({ position: { x: 200, y: 380 } });
-const enem2 = new Enemy({ position: { x: 0, y: 380 } });
+const enemies = [];
+for (let i = 0; i < 10; i++) {
+  const x_offset = i * 150;
+  enemies.push(
+    new Enemy({
+      position: { x: waypoints[0].x - x_offset, y: waypoints[0].y }, //enemies 배열 내의 값들을 Enemy 클래스로 푸쉬
+    })
+  );
+}
 
 function animate() {
   requestAnimationFrame(animate);
 
   context.drawImage(background_image, 0, 0);
-  enemy.update();
-  enem2.update();
-
-  // context.fillStyle = "red";
-  // context.fillRect(x, 400, 100, 100);
-  // x++;
+  enemies.forEach((enemy) => {
+    enemy.update();
+  });
 }

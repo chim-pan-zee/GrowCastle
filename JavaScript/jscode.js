@@ -33,8 +33,6 @@ placement_tiles_data_2d.forEach((row, y) => {
   });
 });
 
-console.log(placement_tiles);
-
 const background_image = new Image();
 background_image.onload = () => {
   //애니메이션 로드
@@ -70,16 +68,34 @@ function animate() {
   });
 
   buildings.forEach((building) => {
-    building.draw();
+    building.update();
+    building.target = null; //타겟이 확인되지 않았을 시에는 null
+    const valid_enemies = enemies.filter((enemy) => {
+      //적이 범위 내로 들어왔는지 확인함.
+      const x_difference = enemy.center.x - building.center.x;
+      const y_difference = enemy.center.y - building.center.y;
+      const distance = Math.hypot(x_difference, y_difference);
+      return distance < enemy.radius + building.radius;
+    });
+    building.target = valid_enemies[0];
 
-    building.project_tiles.forEach((project_tile) => {
+    for (let i = building.project_tiles.length - 1; i >= 0; i--) {
+      const project_tile = building.project_tiles[i];
+
       project_tile.update();
 
-      const xDifference =
-        project_tile.enemy.position.x - project_tile.position.x;
-      console.log(xDifference);
-      //const distance = Math.hypot();
-    });
+      const x_difference =
+        project_tile.enemy.center.x - project_tile.position.x;
+      const y_difference =
+        project_tile.enemy.center.y - project_tile.position.y;
+      const distance = Math.hypot(x_difference, y_difference); //distance: 거리라는 뜻. 즉, 이러이러한 공식을 통해 거리 측정
+
+      if (distance < project_tile.enemy.radius + project_tile.radius) {
+        //적의 반경과의 거리가 가까워지면, 총알이 사라짐
+        building.project_tiles.splice(i, 1);
+      }
+      console.log(distance);
+    }
   });
 }
 
@@ -102,7 +118,6 @@ canvas.addEventListener("click", (event) => {
     );
     active_tile.isOccupied = true; //이미 타일 내에 빌딩이 되었다면 더 이상 빌딩이 불가능함.
   }
-  console.log(buildings);
 });
 
 window.addEventListener("mousemove", (event) => {
@@ -123,6 +138,4 @@ window.addEventListener("mousemove", (event) => {
       break;
     }
   }
-
-  console.log(active_tile);
 });

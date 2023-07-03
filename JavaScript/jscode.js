@@ -13,21 +13,6 @@ for (let i = 0; i < placement_tiles_data.length; i += 20) {
   placement_tiles_data_2d.push(placement_tiles_data.slice(i, i + 20));
 }
 
-class PlacementTile {
-  //타일 속성 클래스
-  constructor({ position = { x: 0, y: 0 } }) {
-    this.position = position;
-    this.size = 64; //타일 사이즈는 64
-    this.color = "green"; //타일 색깔은 초록색
-  }
-
-  draw() {
-    //타일 그래픽
-    context.fillStyle = this.color;
-    context.fillRect(this.position.x, this.position.y, this.size, this.size);
-  }
-}
-
 const placement_tiles = []; //타일 배열
 
 placement_tiles_data_2d.forEach((row, y) => {
@@ -57,49 +42,6 @@ background_image.onload = () => {
 };
 background_image.src = "Assets/sand_template.jpg";
 
-class Enemy {
-  //적 속성
-  constructor({ position = { x: 0, y: 0 } }) {
-    this.position = position; //위치(0, 0)
-    this.width = 100; //적의 가로, 세로
-    this.height = 100;
-    this.waypointIndex = 0;
-    this.center = {
-      x: this.position.x + this.width / 2,
-      y: this.position.y + this.height / 2,
-    };
-  }
-
-  draw() {
-    context.fillStyle = "red"; //캔버스 내 오브젝트들의 속성을 담당
-    context.fillRect(this.position.x, this.position.y, this.width, this.height);
-  }
-
-  update() {
-    //실행을 담당
-    this.draw(); //업데이트에서 오브젝트 속성 실행
-
-    const waypoint = waypoints[this.waypointIndex];
-    const y_distance = waypoint.y - this.center.y;
-    const x_distance = waypoint.x - this.center.x;
-    const angle = Math.atan2(y_distance, x_distance);
-    this.position.x += Math.cos(angle);
-    this.position.y += Math.sin(angle);
-    this.center = {
-      x: this.position.x + this.width / 2,
-      y: this.position.y + this.height / 2,
-    };
-
-    if (
-      Math.round(this.center.x) === Math.round(waypoint.x) &&
-      Math.round(this.center.y) === Math.round(waypoint.y) &&
-      this.waypointIndex < waypoints.length - 1
-    ) {
-      this.waypointIndex++;
-    }
-  }
-}
-
 const enemies = []; //적 배열 생성
 for (let i = 1; i < 10; i++) {
   //적이 반복문을 통해 연속해서 생성됨
@@ -111,6 +53,9 @@ for (let i = 1; i < 10; i++) {
   );
 }
 
+const buildings = [];
+let active_tile = undefined;
+
 function animate() {
   //동작 담당 함수
   requestAnimationFrame(animate);
@@ -121,6 +66,63 @@ function animate() {
   });
 
   placement_tiles.forEach((tile) => {
-    tile.draw();
+    tile.update(mouse);
+  });
+
+  buildings.forEach((building) => {
+    building.draw();
+
+    building.project_tiles.forEach((project_tile) => {
+      project_tile.update();
+
+      const xDifference =
+        project_tile.enemy.position.x - project_tile.position.x;
+      console.log(xDifference);
+      //const distance = Math.hypot();
+    });
   });
 }
+
+const mouse = {
+  //마우스의 x값과 y값
+  x: undefined, //초기값은 없음
+  y: undefined,
+};
+
+canvas.addEventListener("click", (event) => {
+  //클릭 시 Building 클래스로 푸쉬
+  if (active_tile && !active_tile.isOccupied) {
+    buildings.push(
+      new Building({
+        position: {
+          x: active_tile.position.x,
+          y: active_tile.position.y,
+        },
+      })
+    );
+    active_tile.isOccupied = true; //이미 타일 내에 빌딩이 되었다면 더 이상 빌딩이 불가능함.
+  }
+  console.log(buildings);
+});
+
+window.addEventListener("mousemove", (event) => {
+  //마우스 동작 감지
+  mouse.x = event.clientX; //마우스의 x값은 마우스 동작 감지에서의 x값
+  mouse.y = event.clientY; //마우스의 y값은 마우스 동작 감지에서의 y값
+
+  active_tile = null;
+  for (let i = 0; i < placement_tiles.length; i++) {
+    const tile = placement_tiles[i];
+    if (
+      mouse.x > tile.position.x &&
+      mouse.x < tile.position.x + tile.size &&
+      mouse.y > tile.position.y &&
+      mouse.y < tile.position.y + tile.size
+    ) {
+      active_tile = tile;
+      break;
+    }
+  }
+
+  console.log(active_tile);
+});

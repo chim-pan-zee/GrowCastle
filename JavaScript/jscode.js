@@ -19,8 +19,18 @@ placement_tiles_data_2d.forEach((row, y) => {
   //forEach란 반복문 함수로, row 값만큼 반복한다는 것
   row.forEach((symbol, x) => {
     //row만큼 반복하며 일치하는 값을 찾음
-    if (symbol === 14) {
-      //14는, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
+    if (symbol === 1) {
+      //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
+      placement_tiles.push(
+        new PlacementTile({
+          position: {
+            x: x * 64,
+            y: y * 64, //타일 사이즈
+          },
+        })
+      );
+    } else if (symbol === 2) {
+      //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
       placement_tiles.push(
         new PlacementTile({
           position: {
@@ -59,9 +69,11 @@ function animate() {
   requestAnimationFrame(animate);
 
   context.drawImage(background_image, 0, 0);
-  enemies.forEach((enemy) => {
+
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const enemy = enemies[i];
     enemy.update();
-  });
+  }
 
   placement_tiles.forEach((tile) => {
     tile.update(mouse);
@@ -90,11 +102,62 @@ function animate() {
         project_tile.enemy.center.y - project_tile.position.y;
       const distance = Math.hypot(x_difference, y_difference); //distance: 거리라는 뜻. 즉, 이러이러한 공식을 통해 거리 측정
 
+      //적 공격
       if (distance < project_tile.enemy.radius + project_tile.radius) {
+        project_tile.enemy.health -= 20; //공격력
         //적의 반경과의 거리가 가까워지면, 총알이 사라짐
+        if (project_tile.enemy.health <= 0) {
+          const enemy_index = enemies.findIndex((enemy) => {
+            return project_tile.enemy === enemy;
+          });
+
+          if (enemy_index > -1) {
+            enemies.splice(enemy_index, 1);
+          }
+        }
         building.project_tiles.splice(i, 1);
       }
-      console.log(distance);
+    }
+  });
+
+  buildings.forEach((building) => {
+    building.update();
+    building.target = null; //타겟이 확인되지 않았을 시에는 null
+    const valid_enemies = enemies.filter((enemy) => {
+      //적이 범위 내로 들어왔는지 확인함.
+      const x_difference = enemy.center.x - building.center.x;
+      const y_difference = enemy.center.y - building.center.y;
+      const distance = Math.hypot(x_difference, y_difference);
+      return distance < enemy.radius + building.radius;
+    });
+    building.target = valid_enemies[0];
+
+    for (let i = building.project_tiles.length - 1; i >= 0; i--) {
+      const project_tile = building.project_tiles[i];
+
+      project_tile.update();
+
+      const x_difference =
+        project_tile.enemy.center.x - project_tile.position.x;
+      const y_difference =
+        project_tile.enemy.center.y - project_tile.position.y;
+      const distance = Math.hypot(x_difference, y_difference); //distance: 거리라는 뜻. 즉, 이러이러한 공식을 통해 거리 측정
+
+      //적 공격
+      if (distance < project_tile.enemy.radius + project_tile.radius) {
+        project_tile.enemy.health -= 1; //공격력
+        //적의 반경과의 거리가 가까워지면, 총알이 사라짐
+        if (project_tile.enemy.health <= 0) {
+          const enemy_index = enemies.findIndex((enemy) => {
+            return project_tile.enemy === enemy;
+          });
+
+          if (enemy_index > -1) {
+            enemies.splice(enemy_index, 1);
+          }
+        }
+        building.project_tiles.splice(i, 1);
+      }
     }
   });
 }
@@ -120,20 +183,27 @@ canvas.addEventListener("click", (event) => {
   }
 });
 
+// 마우스 움직임을 감지하는 이벤트 리스너 등록
 window.addEventListener("mousemove", (event) => {
-  //마우스 동작 감지
-  mouse.x = event.clientX; //마우스의 x값은 마우스 동작 감지에서의 x값
-  mouse.y = event.clientY; //마우스의 y값은 마우스 동작 감지에서의 y값
+  // 마우스의 x, y 좌표값을 저장할 변수 초기화
+  mouse.x = event.clientX; // 마우스의 x 좌표는 마우스 이벤트에서의 x 좌표값
+  mouse.y = event.clientY; // 마우스의 y 좌표는 마우스 이벤트에서의 y 좌표값
 
+  // 활성화된 타일 초기화
   active_tile = null;
+
+  // 모든 타일을 순회하며 마우스가 위치한 타일을 찾음
   for (let i = 0; i < placement_tiles.length; i++) {
-    const tile = placement_tiles[i];
+    const tile = placement_tiles[i]; // 타워 설치 타일
+
+    // 마우스의 위치가 타일 내에 있는지 확인
     if (
       mouse.x > tile.position.x &&
       mouse.x < tile.position.x + tile.size &&
       mouse.y > tile.position.y &&
       mouse.y < tile.position.y + tile.size
     ) {
+      // 마우스가 위치한 타일을 활성화된 타일로 설정하고 반복문 종료
       active_tile = tile;
       break;
     }

@@ -31,31 +31,28 @@ class PlacementTile {
 }
 
 class Enemy {
-  //적 속성
   constructor({ position = { x: 0, y: 0 } }) {
-    this.position = position; //위치(0, 0)
-    this.width = 100; //적의 가로, 세로
+    this.position = position;
+    this.width = 100;
     this.height = 100;
-    this.waypointIndex = 0; //적 경로 정보
+    this.waypoint_index = 0;
     this.center = {
-      x: this.position.x + this.width / 2, //center는 너비와 높이의 중앙
+      x: this.position.x + this.width / 2,
       y: this.position.y + this.height / 2,
     };
-    this.radius = 50; //반지름
-    this.health = 100; //체력
+    this.radius = 50;
+    this.health = 100;
   }
 
   draw() {
-    //Enemy
     context.fillStyle = "red"; //캔버스 내 오브젝트들의 속성을 담당
 
     context.beginPath();
     context.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
     context.fill();
-
-    //체력바
+    // health bar
     context.fillStyle = "black";
-    context.fillRect(this.position.x, this.position.y - 15, this.width, 10); //y값을 낮출수록 체력바 위치가 상승
+    context.fillRect(this.position.x, this.position.y - 15, this.width, 10);
 
     context.fillStyle = "green";
     context.fillRect(
@@ -67,15 +64,16 @@ class Enemy {
   }
 
   update() {
-    //실행을 담당
-    this.draw(); //draw는 구현
+    this.draw();
 
-    const waypoint = waypoints[this.waypointIndex];
+    const waypoint = waypoints[this.waypoint_index];
     const y_distance = waypoint.y - this.center.y;
     const x_distance = waypoint.x - this.center.x;
     const angle = Math.atan2(y_distance, x_distance);
+
     this.position.x += Math.cos(angle);
     this.position.y += Math.sin(angle);
+
     this.center = {
       x: this.position.x + this.width / 2,
       y: this.position.y + this.height / 2,
@@ -84,14 +82,14 @@ class Enemy {
     if (
       Math.round(this.center.x) === Math.round(waypoint.x) &&
       Math.round(this.center.y) === Math.round(waypoint.y) &&
-      this.waypointIndex < waypoints.length - 1
+      this.waypoint_index < waypoints.length - 1
     ) {
-      this.waypointIndex++;
+      this.waypoint_index++;
     }
   }
 }
 
-class Projecttile {
+class ProjectTile {
   constructor({ position = { x: 0, y: 0 }, enemy }) {
     this.position = position;
     this.velocity = {
@@ -158,52 +156,7 @@ class Building {
     if (this.frames % 100 === 0 && this.target) {
       //적 추적 및 발사
       this.project_tiles.push(
-        new Projecttile({
-          position: {
-            x: this.center.x,
-            y: this.center.y,
-          },
-          enemy: this.target,
-        })
-      );
-    }
-    this.frames++;
-  }
-}
-
-class LongBowArcher {
-  //장궁수
-  constructor({ position = { x: 0, y: 0 } }) {
-    this.position = position;
-    this.width = 64; //64 * 64px
-    this.height = 64;
-    this.center = {
-      //중앙값
-      x: this.position.x + this.width / 2,
-      y: this.position.y + this.height / 2,
-    };
-    this.project_tiles = [];
-    this.radius = 600;
-    this.target;
-    this.frames = 0;
-  }
-
-  draw() {
-    context.fillStyle = "green"; //포탑 색은 파란색
-    context.fillRect(this.position.x, this.position.y, 64, 64);
-
-    context.beginPath();
-    context.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2); //사정거리
-    context.fillStyle = "rgba(0, 0, 255, 0.5)";
-    context.fill();
-  }
-
-  update() {
-    this.draw();
-    if (this.frames % 100 === 0 && this.target) {
-      //적 추적 및 발사
-      this.project_tiles.push(
-        new Projecttile({
+        new ProjectTile({
           position: {
             x: this.center.x,
             y: this.center.y,

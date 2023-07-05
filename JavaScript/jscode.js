@@ -38,11 +38,12 @@ background_image.onload = () => {
   //애니메이션 로드
   animate();
 };
-background_image.src = "Assets/sand_template.jpg";
+background_image.src = "Assets/sand_template.jpg"; //배경사진
 
 const enemies = []; //적 배열 생성
 
 function spawnEnemies(spawn_count) {
+  //웨이브 당 적 마릿수 증가
   for (let i = 1; i < spawn_count + 1; i++) {
     //적이 반복문을 통해 연속해서 생성됨
     const x_offset = i * 150;
@@ -58,7 +59,8 @@ function spawnEnemies(spawn_count) {
 const buildings = [];
 let active_tile = undefined;
 let enemy_count = 3;
-spawnEnemies();
+let castle_hp = 300;
+spawnEnemies(enemy_count);
 
 function animate() {
   //동작 담당 함수
@@ -69,6 +71,16 @@ function animate() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     enemy.update();
+
+    if (enemy.position.x > 681) {
+      //성문 위치에 몬스터들이 도달할 시 피해
+      castle_hp -= 5;
+      console.log("auch");
+
+      if (castle_hp === 0) {
+        console.log("defeat");
+      }
+    }
   }
 
   if (enemies.length === 0) {
@@ -105,7 +117,7 @@ function animate() {
 
       //적 공격
       if (distance < project_tile.enemy.radius + project_tile.radius) {
-        project_tile.enemy.health -= 50; //공격력
+        project_tile.enemy.health -= 20; //공격력
         //적의 반경과의 거리가 가까워지면, 총알이 사라짐
         if (project_tile.enemy.health <= 0) {
           const enemy_index = enemies.findIndex((enemy) => {

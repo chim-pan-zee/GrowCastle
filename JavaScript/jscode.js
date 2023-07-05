@@ -19,17 +19,7 @@ placement_tiles_data_2d.forEach((row, y) => {
   //forEach란 반복문 함수로, row 값만큼 반복한다는 것
   row.forEach((symbol, x) => {
     //row만큼 반복하며 일치하는 값을 찾음
-    if (symbol === 1) {
-      //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
-      placement_tiles.push(
-        new PlacementTile({
-          position: {
-            x: x * 64,
-            y: y * 64, //타일 사이즈
-          },
-        })
-      );
-    } else if (symbol === 2) {
+    if (symbol === 14) {
       //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
       placement_tiles.push(
         new PlacementTile({
@@ -51,28 +41,39 @@ background_image.onload = () => {
 background_image.src = "Assets/sand_template.jpg";
 
 const enemies = []; //적 배열 생성
-for (let i = 1; i < 10; i++) {
-  //적이 반복문을 통해 연속해서 생성됨
-  const x_offset = i * 150;
-  enemies.push(
-    new Enemy({
-      position: { x: waypoints[0].x - x_offset, y: waypoints[0].y }, //enemies 배열 내의 값들을 Enemy 클래스로 푸쉬
-    })
-  );
+
+function spawnEnemies(spawn_count) {
+  for (let i = 1; i < spawn_count + 1; i++) {
+    //적이 반복문을 통해 연속해서 생성됨
+    const x_offset = i * 150;
+    enemies.push(
+      new Enemy({
+        position: { x: waypoints[0].x - x_offset, y: waypoints[0].y }, //enemies 배열 내의 값들을 Enemy 클래스로 푸쉬
+      })
+    );
+  }
 }
 
+//각종 변수 정의
 const buildings = [];
 let active_tile = undefined;
+let enemy_count = 3;
+spawnEnemies();
 
 function animate() {
   //동작 담당 함수
-  requestAnimationFrame(animate);
+  const animation_id = requestAnimationFrame(animate);
 
   context.drawImage(background_image, 0, 0);
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     enemy.update();
+  }
+
+  if (enemies.length === 0) {
+    enemy_count += 2;
+    spawnEnemies(enemy_count);
   }
 
   placement_tiles.forEach((tile) => {
@@ -104,48 +105,7 @@ function animate() {
 
       //적 공격
       if (distance < project_tile.enemy.radius + project_tile.radius) {
-        project_tile.enemy.health -= 20; //공격력
-        //적의 반경과의 거리가 가까워지면, 총알이 사라짐
-        if (project_tile.enemy.health <= 0) {
-          const enemy_index = enemies.findIndex((enemy) => {
-            return project_tile.enemy === enemy;
-          });
-
-          if (enemy_index > -1) {
-            enemies.splice(enemy_index, 1);
-          }
-        }
-        building.project_tiles.splice(i, 1);
-      }
-    }
-  });
-
-  buildings.forEach((building) => {
-    building.update();
-    building.target = null; //타겟이 확인되지 않았을 시에는 null
-    const valid_enemies = enemies.filter((enemy) => {
-      //적이 범위 내로 들어왔는지 확인함.
-      const x_difference = enemy.center.x - building.center.x;
-      const y_difference = enemy.center.y - building.center.y;
-      const distance = Math.hypot(x_difference, y_difference);
-      return distance < enemy.radius + building.radius;
-    });
-    building.target = valid_enemies[0];
-
-    for (let i = building.project_tiles.length - 1; i >= 0; i--) {
-      const project_tile = building.project_tiles[i];
-
-      project_tile.update();
-
-      const x_difference =
-        project_tile.enemy.center.x - project_tile.position.x;
-      const y_difference =
-        project_tile.enemy.center.y - project_tile.position.y;
-      const distance = Math.hypot(x_difference, y_difference); //distance: 거리라는 뜻. 즉, 이러이러한 공식을 통해 거리 측정
-
-      //적 공격
-      if (distance < project_tile.enemy.radius + project_tile.radius) {
-        project_tile.enemy.health -= 1; //공격력
+        project_tile.enemy.health -= 50; //공격력
         //적의 반경과의 거리가 가까워지면, 총알이 사라짐
         if (project_tile.enemy.health <= 0) {
           const enemy_index = enemies.findIndex((enemy) => {
@@ -179,7 +139,10 @@ canvas.addEventListener("click", (event) => {
         },
       })
     );
-    active_tile.isOccupied = true; //이미 타일 내에 빌딩이 되었다면 더 이상 빌딩이 불가능함.
+    active_tile.isOccupied = true;
+    buildings.sort((a, b) => {
+      return a.position.y - b.position.y;
+    }); //이미 타일 내에 빌딩이 되었다면 더 이상 빌딩이 불가능함.
   }
 });
 

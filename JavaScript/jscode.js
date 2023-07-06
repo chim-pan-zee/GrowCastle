@@ -14,6 +14,7 @@ for (let i = 0; i < placement_tiles_data.length; i += 20) {
 }
 
 const placement_tiles = []; //타일 배열
+const castle = new Castle({ position: { x: 0, y: 0 } });
 
 placement_tiles_data_2d.forEach((row, y) => {
   //forEach란 반복문 함수로, row 값만큼 반복한다는 것
@@ -23,6 +24,17 @@ placement_tiles_data_2d.forEach((row, y) => {
       //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
       placement_tiles.push(
         new PlacementTile({
+          position: {
+            x: x * 64,
+            y: y * 64, //타일 사이즈
+          },
+        })
+      );
+    }
+    if (symbol === 15) {
+      //1은, placement_tiles_data배열에서 포탑을 설치할 수 있는 값
+      placement_tiles.push(
+        new Castle({
           position: {
             x: x * 64,
             y: y * 64, //타일 사이즈
@@ -59,7 +71,7 @@ function spawnEnemies(spawn_count) {
 const buildings = [];
 let active_tile = undefined;
 let enemy_count = 3;
-let castle_hp = 300;
+let castle_hp = 2500;
 spawnEnemies(enemy_count);
 
 function animate() {
@@ -74,11 +86,16 @@ function animate() {
 
     if (enemy.position.x > 681) {
       //성문 위치에 몬스터들이 도달할 시 피해
-      castle_hp -= 5;
-      console.log("auch");
+      castle.health -= 5; //몬스터 공격력
+      console.log("auch" + castle.health);
 
-      if (castle_hp === 0) {
+      if (castle.health < 0) {
         console.log("defeat");
+        enemies.splice(i, 1);
+        console.log(enemies.length);
+        // if (enemies.length === 0) {
+        //   enemy.position.x = 0;
+        // }
       }
     }
   }

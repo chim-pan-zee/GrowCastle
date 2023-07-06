@@ -30,6 +30,44 @@ class PlacementTile {
   }
 }
 
+class Castle {
+  constructor({ position = { x: 0, y: 0 } }) {
+    //constructor는 생성자라는 뜻. 기본 정보들을 할당
+    this.position = position;
+    this.width = 428; //타일 사이즈는 64
+    this.height = 600; //타일 사이즈는 64
+    this.color = "rgba(128, 128, 128, 1)"; //타일 색깔은 옅은 검정
+    this.health = 2000;
+  }
+
+  draw() {
+    //타일 그래픽
+    context.fillStyle = this.color;
+    context.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+    context.fillStyle = "black";
+    context.fillRect(
+      this.position.x - 50,
+      this.position.y - 90,
+      this.health / 6,
+      30
+    );
+
+    context.fillStyle = "green";
+    context.fillRect(
+      this.position.x - 50,
+      this.position.y - 90,
+      this.health / 6,
+      30
+    );
+  }
+
+  update() {
+    //마우스 정보 업데이트
+    this.draw();
+  }
+}
+
 class Enemy {
   constructor({ position = { x: 0, y: 0 } }) {
     this.position = position;
@@ -75,7 +113,7 @@ class Enemy {
     const x_distance = waypoint.x - this.center.x;
     const angle = Math.atan2(y_distance, x_distance);
 
-    const speed = 3; //몬스터 속도
+    const speed = 10; //몬스터 속도
 
     this.velocity.x = Math.cos(angle) * speed;
     this.velocity.y = Math.sin(angle) * speed;
@@ -147,7 +185,7 @@ class Building {
       y: this.position.y + this.height / 2,
     };
     this.project_tiles = [];
-    this.radius = 150;
+    this.radius = 200;
     this.target;
     this.frames = 0;
   }

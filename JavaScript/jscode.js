@@ -54,6 +54,7 @@ background_image.src = "Assets/sand_template.jpg"; //배경사진
 
 const enemies = []; //적 배열 생성
 
+//라운드 시작 버튼 클릭 시
 function spawnEnemies(spawn_count) {
   //웨이브 당 적 마릿수 증가
   for (let i = 1; i < spawn_count + 1; i++) {
@@ -71,7 +72,6 @@ function spawnEnemies(spawn_count) {
 const buildings = [];
 let active_tile = undefined;
 let enemy_count = 3;
-let castle_hp = 2500;
 spawnEnemies(enemy_count);
 
 function animate() {
@@ -86,13 +86,15 @@ function animate() {
 
     if (enemy.position.x > 681) {
       //성문 위치에 몬스터들이 도달할 시 피해
-      castle.health -= 5; //몬스터 공격력
+      castle.health -= 1; //몬스터 공격력
       console.log("auch" + castle.health);
+      castle.update();
 
       if (castle.health < 0) {
         console.log("defeat");
         enemies.splice(i, 1);
         console.log(enemies.length);
+        location.href = "MainPage.html";
         // if (enemies.length === 0) {
         //   enemy.position.x = 0;
         // }

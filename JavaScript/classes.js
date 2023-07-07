@@ -37,19 +37,19 @@ class Castle {
     this.width = 428; //타일 사이즈는 64
     this.height = 600; //타일 사이즈는 64
     this.color = "rgba(128, 128, 128, 1)"; //타일 색깔은 옅은 검정
-    this.health = 2000;
+    this.health = 100; //성 체력
   }
 
   draw() {
     //타일 그래픽
-    context.fillStyle = this.color;
-    context.fillRect(this.position.x, this.position.y, this.width, this.height);
+    // context.fillStyle = this.color;
+    // context.fillRect(this.position.x, this.position.y, this.width, this.height);
 
     context.fillStyle = "black";
     context.fillRect(
       this.position.x - 50,
       this.position.y - 90,
-      this.health / 6,
+      this.width,
       30
     );
 
@@ -57,7 +57,7 @@ class Castle {
     context.fillRect(
       this.position.x - 50,
       this.position.y - 90,
-      this.health / 6,
+      this.health,
       30
     );
   }

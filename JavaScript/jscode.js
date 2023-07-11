@@ -50,7 +50,7 @@ background_image.onload = () => {
   //애니메이션 로드
   animate();
 };
-background_image.src = "Assets/sand_template.jpg"; //배경사진
+background_image.src = "Assets/background.png"; //배경사진
 
 const enemies = []; //적 배열 생성
 
@@ -72,6 +72,7 @@ function spawnEnemies(spawn_count) {
 const buildings = [];
 let active_tile = undefined;
 let enemy_count = 3;
+let archer_power = 20;
 spawnEnemies(enemy_count);
 
 function animate() {
@@ -86,14 +87,11 @@ function animate() {
 
     if (enemy.position.x > 681) {
       //성문 위치에 몬스터들이 도달할 시 피해
-      castle.health -= 1; //몬스터 공격력
-      console.log("auch" + castle.health);
-      castle.update();
+      castle.health -= 10; //몬스터 공격력
+      document.querySelector("#castle-health").innerHTML = castle.health;
 
       if (castle.health < 0) {
-        console.log("defeat");
         enemies.splice(i, 1);
-        console.log(enemies.length);
         location.href = "MainPage.html";
         // if (enemies.length === 0) {
         //   enemy.position.x = 0;
@@ -103,8 +101,8 @@ function animate() {
   }
 
   if (enemies.length === 0) {
-    enemy_count += 2;
-    spawnEnemies(enemy_count);
+    enemy_count += 1;
+    project_tile.enemy.health += 100;
   }
 
   placement_tiles.forEach((tile) => {
@@ -136,7 +134,7 @@ function animate() {
 
       //적 공격
       if (distance < project_tile.enemy.radius + project_tile.radius) {
-        project_tile.enemy.health -= 20; //공격력
+        project_tile.enemy.health -= archer_power; //궁수 공격력
         //적의 반경과의 거리가 가까워지면, 총알이 사라짐
         if (project_tile.enemy.health <= 0) {
           const enemy_index = enemies.findIndex((enemy) => {
@@ -152,6 +150,16 @@ function animate() {
     }
   });
 }
+
+document.getElementById("archer-upgrade").onclick = function () {
+  archer_power += 10;
+  console.log(archer_power);
+};
+
+document.getElementById("castle-upgrade").onclick = function () {
+  castle.health += 50;
+  console.log(castle.health);
+};
 
 const mouse = {
   //마우스의 x값과 y값

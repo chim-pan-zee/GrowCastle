@@ -1,3 +1,26 @@
 body {
-  background-color: aliceblue;
+  height: 100vh;
+  background: url(https://media.discordapp.net/attachments/987640587425550366/1128172326228336640/Wallpaper.png?width=1040&height=585)
+    no-repeat center;
+  background-size: cover;
+}
+
+#castle-health-frame {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 36px;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+#castle-health {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 36px;
+  color: white;
+  display: flex;
+  align-items: center;
 }
